@@ -1,0 +1,147 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  /* Premium Slate Palette */
+  --bg-body: #F8FAFC;
+  /* Slate 50 - Main background */
+  --bg-card: #FFFFFF;
+  /* White - Card background */
+  --bg-subtle: #F1F5F9;
+  /* Slate 100 - Hovers/Subtle backgrounds */
+
+  --text-primary: #0F172A;
+  /* Slate 900 - Primary text */
+  --text-secondary: #64748B;
+  /* Slate 500 - Secondary text */
+  --text-tertiary: #94A3B8;
+  /* Slate 400 - Disabled/Placeholder */
+
+  --accent-primary: #4F46E5;
+  /* Indigo 600 - Primary Brand */
+  --accent-hover: #4338CA;
+  /* Indigo 700 - Hover State */
+  --accent-light: #EEF2FF;
+  /* Indigo 50 - Light backgrounds */
+
+  --border-subtle: #E2E8F0;
+  /* Slate 200 - Borders */
+  --border-focus: #6366F1;
+  /* Indigo 500 - Focus rings */
+
+  /* Status Colors */
+  --status-success: #10B981;
+  /* Emerald 500 */
+  --status-warning: #F59E0B;
+  /* Amber 500 */
+  --status-error: #EF4444;
+  /* Red 500 */
+  --status-info: #3B82F6;
+  /* Blue 500 */
+
+  /* Shadows - Diffuse & Premium */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  /* Key for modern look */
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: all 0.15s ease-in-out;
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  background-color: var(--bg-body);
+  color: var(--text-primary);
+  font-family: 'Inter', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+code,
+pre {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Base Typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--text-primary);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  /* Tighter tracking for headings */
+}
+
+h1 {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+}
+
+h2 {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+
+p {
+  color: var(--text-secondary);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  /* Slate 300 */
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+  /* Slate 400 */
+}
+
+/* Utility Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
