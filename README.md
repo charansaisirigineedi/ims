@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Laboratory Inventory Management System (IMS)
 
-## Getting Started
+A modern, secure, and role-based inventory management system designed for high-throughput laboratories. This system handles asset tracking, procurement lifecycles, and audit compliance with strict data integrity enforcement.
 
-First, run the development server:
+## 🚀 Core Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### 📦 Inventory Management
+*   **Asset Tracking**: Real-time tracking of chemical reagents and equipment.
+*   **Stock Take Tool**: Specialized interfaces for stock audits.
+    *   **Admin Mode**: Full physical audit capabilities.
+    *   **Researcher Mode**: Restricted to "Utilisation Reporting" only.
+*   **Expiry Alerts**: Automated visual indicators for expiring or low-stock items.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 📝 Procurement & Orders
+*   **Batch Operations**: Create Purchase Orders or Audit Batches for multiple items simultaneously.
+*   **Procurement Lifecycle**:
+    *   `Requested` → `Received` → `Finalised`
+*   **PDF Generation**: Professional Purchase Order export for vendors (powered by `react-to-print`).
+*   **Reconciliation**: Built-in "Requested vs. Received" discrepancy tracking.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 🛡️ Security & RBAC
+*   **Role-Based Access Control**:
+    *   **Admins**: Full control over assets, users, and approvals.
+    *   **Researchers**: View-only access to registry; can report usage but cannot alter core records.
+*   **Strict Session Integrity**:
+    *   **No Ghost Users**: Backend strictly validates every write operation against the live database.
+    *   **Forced Logout**: Client automatically forces re-authentication if a session becomes stale or invalid (e.g., deleted user).
+*   **Audit Trail**: Immutable logs for every stock movement, tagged with the initiating user and reason context.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🛠️ Tech Stack
 
-## Learn More
+*   **Framework**: [Next.js 14](https://nextjs.org/) (App Router)
+*   **Database**: MongoDB (via Mongoose)
+*   **Authentication**: NextAuth.js (Custom Credentials Provider)
+*   **Styling**: Vanilla CSS with modern tokens / Glassmorphism UI
+*   **Icons**: Lucide React
+*   **PDF Engine**: React-to-Print
 
-To learn more about Next.js, take a look at the following resources:
+## ⚙️ Getting Started
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Prerequisites
+*   Node.js (v18+)
+*   MongoDB Instance
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Installation
 
-## Deploy on Vercel
+1.  Clone the repository:
+    ```bash
+    git clone https://github.com/your-org/ims.git
+    cd ims
+    ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+2.  Install dependencies:
+    ```bash
+    npm install
+    ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+3.  Configure Environment:
+    Create a `.env` file in the root directory:
+    ```env
+    MONGODB_URI=mongodb://localhost:27017/ims
+    NEXTAUTH_SECRET=your_super_secret_key
+    NEXTAUTH_URL=http://localhost:3000
+    ```
+
+4.  Seed the Database (Optional):
+    ```bash
+    npm run seed
+    ```
+
+5.  Run Development Server:
+    ```bash
+    npm run dev
+    ```
+
+## 📂 Project Structure
+
+*   `/app`: Next.js App Router pages and API endpoints.
+*   `/components`: Reusable UI components (Navbar, PO Template, etc.).
+*   `/models`: Mongoose database schemas (User, Item, Order, UsageLog).
+*   `/lib`: Utility functions (Auth, DB Connect).
+
+## 🔒 Security Best Practices
+
+This project implements a **"Trust No One"** architecture for session management.
+*   API endpoints do not trust the JWT token alone; they verify the user's existence in the database for every state-changing request.
+*   Orphaned sessions are aggressively completely invalidated to prevent data corruption.
