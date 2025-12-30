@@ -56,12 +56,16 @@ A modern, secure, and role-based inventory management system designed for high-t
     ```
 
 3.  Configure Environment:
-    Create a `.env` file in the root directory:
+    Create a `.env.local` file in the root directory:
     ```env
-    MONGODB_URI=mongodb://localhost:27017/ims
+    MONGODB_URI=mongodb://localhost:27017
+    DB_NAME=ims_development
     NEXTAUTH_SECRET=your_super_secret_key
     NEXTAUTH_URL=http://localhost:3000
+    NODE_ENV=development
     ```
+    
+    **Note**: For production deployment, see [VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md)
 
 4.  Seed the Database (Optional):
     ```bash
