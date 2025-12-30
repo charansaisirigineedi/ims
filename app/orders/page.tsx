@@ -38,7 +38,7 @@ export default function OrdersPage() {
         try {
             const res = await fetch(`/api/orders?page=${page}&limit=${limit}&type=${filterType}&status=${filterStatus}`);
             const data = await res.json();
-            setOrders(data.orders);
+            setOrders(data.orders || []);
             setTotalPages(data.pages);
             setTotalItems(data.total);
         } catch (err) {

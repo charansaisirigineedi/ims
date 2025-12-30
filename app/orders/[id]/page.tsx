@@ -20,9 +20,9 @@ import { useParams, useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { useSession } from "next-auth/react";
 import Papa from "papaparse";
-import { useReactToPrint } from "react-to-print";
-import { PurchaseOrderTemplate } from "@/components/PurchaseOrderTemplate";
-import { useRef } from "react";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+
 
 export default function OrderDetailsPage() {
     const { id } = useParams();
@@ -35,12 +35,6 @@ export default function OrderDetailsPage() {
     // Fulfillment state: tracks what's actually being received/confirmed
     const [receivedQtys, setReceivedQtys] = useState<{ [key: string]: number }>({});
     const isAdmin = (session?.user as any)?.role === 'admin';
-    const componentRef = useRef<HTMLDivElement>(null);
-
-    const handlePrint = useReactToPrint({
-        content: () => componentRef.current,
-        documentTitle: `PO-${id}`,
-    } as any);
 
     useEffect(() => {
         fetchOrder();
@@ -110,6 +104,106 @@ export default function OrderDetailsPage() {
         link.click();
     };
 
+    const handleDownloadPDF = () => {
+        try {
+            const doc = new jsPDF() as any;
+            const margin = 20;
+
+            // Header
+            doc.setFontSize(22);
+            doc.setFont("helvetica", "bold");
+            doc.text("PURCHASE REQUEST ORDER", margin, 30);
+
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            doc.setTextColor(100);
+            doc.text("LABORATORY PROCUREMENT DOCUMENT", margin, 36);
+
+            // Company Details (Right side)
+            const pageWidth = doc.internal.pageSize.width;
+            doc.setTextColor(0);
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "bold");
+            doc.text("IMS CO.", pageWidth - margin, 30, { align: "right" });
+            doc.setFontSize(9);
+            doc.setFont("helvetica", "normal");
+            doc.text("123 Research Blvd, Science Park", pageWidth - margin, 35, { align: "right" });
+            doc.text("New York, NY 10012", pageWidth - margin, 39, { align: "right" });
+
+            doc.line(margin, 45, pageWidth - margin, 45);
+
+            // Order & Vendor Info
+            const infoStartY = 55;
+
+            // Col 1: Vendor (Generic)
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "bold");
+            doc.text("VENDOR:", margin, infoStartY);
+            doc.setFont("helvetica", "normal");
+            doc.text("Generic Laboratory Supplier", margin, infoStartY + 6);
+            doc.text("Vendor ID: SUP-001", margin, infoStartY + 11);
+
+            // Col 2: PO Details
+            const col2X = pageWidth / 2 + 20;
+            doc.setFont("helvetica", "bold");
+            doc.text("ORDER DETAILS:", col2X, infoStartY);
+            doc.setFont("helvetica", "normal");
+
+            doc.text(`PO Number: ${order._id.slice(-8).toUpperCase()}`, col2X, infoStartY + 6);
+            doc.text(`Date Issued: ${new Date(order.createdAt).toLocaleDateString()}`, col2X, infoStartY + 11);
+            doc.text(`Requested By: ${order.user_id?.name || 'Admin'}`, col2X, infoStartY + 16);
+
+            // Table
+            const tableStartY = 80;
+            const tableBody = (order.items || []).map((item: any) => [
+                { content: item.item_id ? item.item_id.name : 'Unknown Item', styles: { fontStyle: 'bold' } },
+                (item.item_id && item.item_id._id ? item.item_id._id : 'N/A').slice(-6).toUpperCase(),
+                { content: `${item.requested_qty || 0} ${item.item_id ? item.item_id.unit : 'Units'}`, styles: { halign: 'right' } },
+                "__________" // For supplier to fill validity/price
+            ]);
+
+            if (typeof doc.autoTable !== 'function') {
+                throw new Error("PDF Table plugin not loaded correctly. Please refresh.");
+            }
+
+            doc.autoTable({
+                startY: tableStartY,
+                head: [['Item Name', 'Reference Code', 'Qty Required', 'Supplier Notes']],
+                body: tableBody,
+                theme: 'grid',
+                headStyles: { fillColor: [30, 30, 30], textColor: 255 },
+                styles: { fontSize: 10, cellPadding: 5 },
+                columnStyles: {
+                    0: { cellWidth: 'auto' },
+                    1: { cellWidth: 40 },
+                    2: { cellWidth: 30, halign: 'right' },
+                    3: { cellWidth: 40 }
+                }
+            });
+
+            // Signatures
+            const finalY = (doc as any).lastAutoTable.finalY + 40;
+
+            doc.setLineWidth(0.5);
+            doc.line(margin, finalY, margin + 60, finalY);
+            doc.setFontSize(8);
+            doc.text("AUTHORIZED SIGNATURE", margin, finalY + 5);
+
+            doc.line(pageWidth - margin - 60, finalY, pageWidth - margin, finalY);
+            doc.text("RECEIVED BY", pageWidth - margin - 60, finalY + 5);
+
+            // Footer
+            doc.setFontSize(8);
+            doc.setTextColor(150);
+            doc.text(`Generated by IMS Laboratory System on ${new Date().toLocaleString()}`, margin, pageWidth - 10); // Rotate 90 deg manually if needed, but here simple footer
+
+            doc.save(`PO_${order._id.slice(-8)}.pdf`);
+        } catch (err: any) {
+            console.error("PDF Generation Error:", err);
+            alert(`Failed to generate PDF: ${err.message}`);
+        }
+    };
+
     if (loading) return (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: 'var(--bg-body)' }}>
             <div className="animate-pulse" style={{ color: 'var(--accent-primary)', fontWeight: 600 }}>Syncing Transaction Data...</div>
@@ -141,8 +235,8 @@ export default function OrderDetailsPage() {
                         </div>
                         <div style={{ display: 'flex', gap: '1rem' }}>
                             {order.type === 'purchase' && (
-                                <button onClick={handlePrint} className="glass glass-interactive" style={{ padding: '10px 20px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <ClipboardList size={18} /> Print PO PDF
+                                <button onClick={handleDownloadPDF} className="glass glass-interactive" style={{ padding: '10px 20px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <Download size={18} /> Download PO PDF
                                 </button>
                             )}
                             <button onClick={exportToCSV} className="action-btn" style={{ padding: '10px 20px' }}>
@@ -283,11 +377,6 @@ export default function OrderDetailsPage() {
                             </div>
                         )}
                     </div>
-                </div>
-
-                {/* Hidden Print Template */}
-                <div style={{ position: "absolute", top: "-10000px", left: "-10000px" }}>
-                    <PurchaseOrderTemplate ref={componentRef} order={order} />
                 </div>
             </div>
         </>
