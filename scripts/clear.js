@@ -4,9 +4,15 @@ const readline = require('readline');
 require('dotenv').config({ path: path.join(__dirname, '../.env.local') });
 
 const MONGODB_URI = process.env.MONGODB_URI;
+const DB_NAME = process.env.DB_NAME;
 
 if (!MONGODB_URI) {
     console.error('Please define the MONGODB_URI environment variable inside .env.local');
+    process.exit(1);
+}
+
+if (!DB_NAME) {
+    console.error('Please define the DB_NAME environment variable inside .env.local');
     process.exit(1);
 }
 
@@ -37,9 +43,10 @@ async function clearDatabase() {
 
         await client.connect();
         console.log('\nConnected to MongoDB');
+        console.log(`Using database: ${DB_NAME}`);
         console.log('Starting data deletion...\n');
 
-        const db = client.db();
+        const db = client.db(DB_NAME);
 
         // List of all collections to clear
         const collections = [

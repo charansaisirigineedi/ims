@@ -7,6 +7,23 @@ if (!MONGODB_URI) {
 }
 
 /**
+ * Get the database name from environment variable
+ * Falls back to extracting from connection string if DB_NAME is not set
+ */
+function getDatabaseName(): string {
+  // Priority 1: Explicit DB_NAME environment variable
+  if (process.env.DB_NAME) {
+    return process.env.DB_NAME;
+  }
+
+  // Priority 2: Default based on NODE_ENV
+  const isProduction = process.env.NODE_ENV === 'production';
+  return isProduction ? 'ims_production' : 'ims_development';
+}
+
+const DATABASE_NAME = getDatabaseName();
+
+/**
  * Global is used here to maintain a cached connection across hot reloads
  * in development. This prevents connections growing exponentially
  * during API Route usage.
@@ -25,6 +42,7 @@ async function dbConnect() {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
+      dbName: DATABASE_NAME, // Explicitly set database name
     };
 
     cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
