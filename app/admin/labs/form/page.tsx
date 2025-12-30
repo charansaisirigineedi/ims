@@ -6,7 +6,9 @@ import { ArrowLeft, Save, FlaskConical } from "lucide-react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 
-export default function LabFormPage() {
+import { Suspense } from "react";
+
+function LabFormContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const labId = searchParams.get('id');
@@ -165,5 +167,13 @@ export default function LabFormPage() {
                 </div>
             </div>
         </>
+    );
+}
+
+export default function LabFormPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <LabFormContent />
+        </Suspense>
     );
 }

@@ -6,7 +6,9 @@ import { ArrowLeft, Save, Database, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 
-export default function InventoryFormPage() {
+import { Suspense } from "react";
+
+function InventoryFormContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const itemId = searchParams.get('id');
@@ -271,5 +273,13 @@ export default function InventoryFormPage() {
                 </div>
             </div>
         </>
+    );
+}
+
+export default function InventoryFormPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <InventoryFormContent />
+        </Suspense>
     );
 }

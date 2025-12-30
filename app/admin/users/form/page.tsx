@@ -6,7 +6,9 @@ import { ArrowLeft, Save, UserPlus, Shield } from "lucide-react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 
-export default function UserFormPage() {
+import { Suspense } from "react";
+
+function UserFormContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const userId = searchParams.get('id');
@@ -199,5 +201,13 @@ export default function UserFormPage() {
                 </div>
             </div>
         </>
+    );
+}
+
+export default function UserFormPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <UserFormContent />
+        </Suspense>
     );
 }

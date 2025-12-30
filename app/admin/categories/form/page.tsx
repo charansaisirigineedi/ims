@@ -6,7 +6,9 @@ import { ArrowLeft, Save, Tag } from "lucide-react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 
-export default function CategoryFormPage() {
+import { Suspense } from "react";
+
+function CategoryFormContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const categoryId = searchParams.get('id');
@@ -157,5 +159,13 @@ export default function CategoryFormPage() {
                 </div>
             </div>
         </>
+    );
+}
+
+export default function CategoryFormPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <CategoryFormContent />
+        </Suspense>
     );
 }
