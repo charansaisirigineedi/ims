@@ -208,13 +208,20 @@ function InventoryFormContent() {
                         <div className="form-group">
                             <label>Current Quantity *</label>
                             <input
-                                required
+                                required={!isEditing}
+                                disabled={isEditing}
                                 type="number"
                                 min="0"
                                 className="input-base"
                                 value={formData.quantity}
                                 onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 0 })}
+                                style={isEditing ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
                             />
+                            {isEditing && (
+                                <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.5rem' }}>
+                                    Quantity can only be set when creating a new item. Use stock movement history to update quantities.
+                                </p>
+                            )}
                         </div>
 
                         <div className="form-group">

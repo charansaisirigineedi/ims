@@ -81,55 +81,11 @@ async function seed() {
         }
         await db.collection('items').insertMany(items);
 
-        // Create some sample logs for the first 5 items
-        const logs = [];
-        for (let i = 0; i < 15; i++) {
-            const item = items[i % 5];
-            logs.push({
-                item_id: item._id,
-                user_id: userId,
-                quantity: Math.floor(Math.random() * 5) + 1,
-                type: i % 2 === 0 ? 'subtract' : 'add',
-                reason: i % 4 === 0 ? 'PHYSICAL_AUDIT' : (i % 2 === 0 ? 'BATCH_USAGE' : 'DIRECT_RESTOCK'),
-                status: i % 3 === 0 ? 'pending' : 'approved',
-                approved_by: i % 3 === 0 ? null : adminId,
-                createdAt: new Date(Date.now() - i * 7200000)
-            });
-        }
-        // Create Sample Orders
-        const sampleOrders = [
-            {
-                user_id: adminId,
-                type: 'purchase',
-                status: 'requested',
-                reason: 'Standard Monthly Buffer Replenishment',
-                items: [
-                    { item_id: items[0]._id, requested_qty: 50, current_stock: items[0].quantity },
-                    { item_id: items[1]._id, requested_qty: 25, current_stock: items[1].quantity }
-                ],
-                createdAt: new Date()
-            },
-            {
-                user_id: userId,
-                type: 'audit',
-                status: 'pending',
-                reason: 'Annual Q4 Inventory Audit',
-                items: [
-                    { item_id: items[5]._id, requested_qty: items[5].quantity + 2, current_stock: items[5].quantity },
-                    { item_id: items[6]._id, requested_qty: items[6].quantity - 1, current_stock: items[6].quantity }
-                ],
-                createdAt: new Date()
-            }
-        ];
-        await db.collection('orders').insertMany(sampleOrders);
-
         console.log(`Database seeded successfully with:
         - 2 Users (Admin & regular)
         - ${labs.length} Laboratories
         - ${categories.length} Categories
-        - ${items.length} Inventory Items
-        - ${logs.length} Usage Logs
-        - ${sampleOrders.length} Batch Transactions`);
+        - ${items.length} Inventory Items`);
     } catch (error) {
         console.error('Error seeding database:', error);
     } finally {

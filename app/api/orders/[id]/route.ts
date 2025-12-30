@@ -17,7 +17,10 @@ export async function GET(
         await dbConnect();
         const order = await Order.findById(params.id)
             .populate("user_id", "name")
-            .populate("items.item_id")
+            .populate({
+                path: "items.item_id",
+                populate: { path: "lab_id", select: "name" }
+            })
             .populate("completed_by", "name");
 
         if (!order) return NextResponse.json({ error: "Order not found" }, { status: 404 });
@@ -66,6 +69,7 @@ export async function PATCH(
                 // Update main inventory
                 const item = await Item.findById(itemUpdate.item_id);
                 if (item) {
+                    const initialQty = item.quantity; // Store quantity before the operation
                     const delta = order.type === 'purchase'
                         ? itemUpdate.received_qty
                         : (itemUpdate.received_qty - item.quantity); // For audits, received_qty is the new total
@@ -81,7 +85,9 @@ export async function PATCH(
                         type: delta >= 0 ? 'add' : 'subtract',
                         reason: order.type === 'purchase' ? `BATCH_PO_${order._id}` : `BATCH_AUDIT_${order._id}`,
                         status: 'approved',
-                        approved_by: session.user.id
+                        approved_by: session.user.id,
+                        initial_quantity: initialQty,
+                        final_quantity: item.quantity // Quantity after the operation
                     });
                 }
             }

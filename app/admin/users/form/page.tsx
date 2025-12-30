@@ -16,21 +16,37 @@ function UserFormContent() {
 
     const [formData, setFormData] = useState({ name: "", email: "", password: "", role: "user" });
     const [loading, setLoading] = useState(false);
+    const [fetching, setFetching] = useState(false);
     const [error, setError] = useState("");
 
     useEffect(() => {
-        if (isEditing) {
+        if (isEditing && userId) {
             fetchUser();
         }
-    }, [userId]);
+    }, [userId, isEditing]);
 
     const fetchUser = async () => {
+        setFetching(true);
+        setError("");
         try {
             const res = await fetch(`/api/admin/users/${userId}`);
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({ error: "Failed to load user data" }));
+                setError(errorData.error || "Failed to load user data");
+                setFetching(false);
+                return;
+            }
             const data = await res.json();
-            setFormData({ name: data.name, email: data.email, password: "", role: data.role });
+            if (data && data.name && data.email) {
+                setFormData({ name: data.name, email: data.email, password: "", role: data.role || "user" });
+            } else {
+                setError("Invalid user data received");
+            }
         } catch (err) {
-            setError("Failed to load user data");
+            console.error("Error fetching user:", err);
+            setError("Failed to load user data. Please check your connection.");
+        } finally {
+            setFetching(false);
         }
     };
 
@@ -107,6 +123,21 @@ function UserFormContent() {
                         </div>
                     </div>
 
+                    {fetching && (
+                        <div style={{
+                            background: 'var(--bg-subtle)',
+                            border: '1px solid var(--border-subtle)',
+                            padding: '1rem',
+                            borderRadius: 'var(--radius-md)',
+                            marginBottom: '1.5rem',
+                            fontSize: '0.875rem',
+                            textAlign: 'center',
+                            color: 'var(--text-secondary)'
+                        }}>
+                            Loading user data...
+                        </div>
+                    )}
+
                     {error && (
                         <div style={{
                             background: '#FEE2E2',
@@ -121,7 +152,7 @@ function UserFormContent() {
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', opacity: fetching ? 0.6 : 1, pointerEvents: fetching ? 'none' : 'auto' }}>
                         <div className="form-group">
                             <label>Full Name *</label>
                             <input
@@ -131,6 +162,7 @@ function UserFormContent() {
                                 value={formData.name}
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                 placeholder="e.g. John Doe"
+                                disabled={fetching}
                             />
                         </div>
 
@@ -143,6 +175,7 @@ function UserFormContent() {
                                 value={formData.email}
                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                 placeholder="e.g. john.doe@lab.com"
+                                disabled={fetching}
                             />
                         </div>
 
@@ -155,6 +188,7 @@ function UserFormContent() {
                                 value={formData.password}
                                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                                 placeholder={isEditing ? "Enter new password to change" : "Enter password"}
+                                disabled={fetching}
                             />
                         </div>
 
@@ -164,6 +198,7 @@ function UserFormContent() {
                                 className="input-base"
                                 value={formData.role}
                                 onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                                disabled={fetching}
                             >
                                 <option value="user">User - Standard Access</option>
                                 <option value="admin">Admin - Full Access</option>
@@ -188,13 +223,13 @@ function UserFormContent() {
                             }}>
                                 Cancel
                             </Link>
-                            <button type="submit" disabled={loading} className="button-primary" style={{
+                            <button type="submit" disabled={loading || fetching} className="button-primary" style={{
                                 flex: 1,
-                                opacity: loading ? 0.6 : 1,
-                                cursor: loading ? 'not-allowed' : 'pointer'
+                                opacity: (loading || fetching) ? 0.6 : 1,
+                                cursor: (loading || fetching) ? 'not-allowed' : 'pointer'
                             }}>
                                 <Save size={18} />
-                                {loading ? 'Saving...' : (isEditing ? 'Update User' : 'Create User')}
+                                {loading ? 'Saving...' : fetching ? 'Loading...' : (isEditing ? 'Update User' : 'Create User')}
                             </button>
                         </div>
                     </form>

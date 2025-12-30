@@ -25,7 +25,11 @@ export async function PUT(
     try {
         await dbConnect();
         const body = await request.json();
-        const item = await Item.findByIdAndUpdate(params.id, body, { new: true });
+        
+        // Remove quantity from update - it can only be set during creation
+        const { quantity, ...updateData } = body;
+        
+        const item = await Item.findByIdAndUpdate(params.id, updateData, { new: true });
         if (!item) return NextResponse.json({ error: "Asset not found" }, { status: 404 });
         return NextResponse.json(item);
     } catch (error: any) {

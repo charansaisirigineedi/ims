@@ -21,7 +21,7 @@ import Navbar from "@/components/Navbar";
 import { useSession } from "next-auth/react";
 import Papa from "papaparse";
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
 
 
 export default function OrderDetailsPage() {
@@ -108,6 +108,7 @@ export default function OrderDetailsPage() {
         try {
             const doc = new jsPDF() as any;
             const margin = 20;
+            const pageWidth = doc.internal.pageSize.width;
 
             // Header
             doc.setFontSize(22);
@@ -119,83 +120,48 @@ export default function OrderDetailsPage() {
             doc.setTextColor(100);
             doc.text("LABORATORY PROCUREMENT DOCUMENT", margin, 36);
 
-            // Company Details (Right side)
-            const pageWidth = doc.internal.pageSize.width;
+            // Lab Address (Right side)
             doc.setTextColor(0);
             doc.setFontSize(12);
             doc.setFont("helvetica", "bold");
-            doc.text("IMS CO.", pageWidth - margin, 30, { align: "right" });
+            doc.text("ACT Science Center", pageWidth - margin, 30, { align: "right" });
             doc.setFontSize(9);
             doc.setFont("helvetica", "normal");
-            doc.text("123 Research Blvd, Science Park", pageWidth - margin, 35, { align: "right" });
-            doc.text("New York, NY 10012", pageWidth - margin, 39, { align: "right" });
+            doc.text("Palakollu", pageWidth - margin, 35, { align: "right" });
 
             doc.line(margin, 45, pageWidth - margin, 45);
 
-            // Order & Vendor Info
+            // Order Info
             const infoStartY = 55;
-
-            // Col 1: Vendor (Generic)
             doc.setFontSize(10);
             doc.setFont("helvetica", "bold");
-            doc.text("VENDOR:", margin, infoStartY);
+            doc.text("ORDER DETAILS:", margin, infoStartY);
             doc.setFont("helvetica", "normal");
-            doc.text("Generic Laboratory Supplier", margin, infoStartY + 6);
-            doc.text("Vendor ID: SUP-001", margin, infoStartY + 11);
+            doc.text(`PO Number: ${order._id.slice(-8).toUpperCase()}`, margin, infoStartY + 6);
+            doc.text(`Date Issued: ${new Date(order.createdAt).toLocaleDateString()}`, margin, infoStartY + 11);
 
-            // Col 2: PO Details
-            const col2X = pageWidth / 2 + 20;
-            doc.setFont("helvetica", "bold");
-            doc.text("ORDER DETAILS:", col2X, infoStartY);
-            doc.setFont("helvetica", "normal");
-
-            doc.text(`PO Number: ${order._id.slice(-8).toUpperCase()}`, col2X, infoStartY + 6);
-            doc.text(`Date Issued: ${new Date(order.createdAt).toLocaleDateString()}`, col2X, infoStartY + 11);
-            doc.text(`Requested By: ${order.user_id?.name || 'Admin'}`, col2X, infoStartY + 16);
-
-            // Table
-            const tableStartY = 80;
+            // Table - Only Item Name, Lab, Qty
+            const tableStartY = 75;
             const tableBody = (order.items || []).map((item: any) => [
-                { content: item.item_id ? item.item_id.name : 'Unknown Item', styles: { fontStyle: 'bold' } },
-                (item.item_id && item.item_id._id ? item.item_id._id : 'N/A').slice(-6).toUpperCase(),
-                { content: `${item.requested_qty || 0} ${item.item_id ? item.item_id.unit : 'Units'}`, styles: { halign: 'right' } },
-                "__________" // For supplier to fill validity/price
+                item.item_id ? item.item_id.name : 'Unknown Item',
+                item.item_id?.lab_id?.name || 'N/A',
+                `${item.requested_qty || 0} ${item.item_id ? item.item_id.unit : 'Units'}`
             ]);
 
-            if (typeof doc.autoTable !== 'function') {
-                throw new Error("PDF Table plugin not loaded correctly. Please refresh.");
-            }
-
-            doc.autoTable({
+            // Use autoTable directly (v5.0+ requires passing doc as first parameter)
+            autoTable(doc, {
                 startY: tableStartY,
-                head: [['Item Name', 'Reference Code', 'Qty Required', 'Supplier Notes']],
+                head: [['Item Name', 'Lab', 'Qty']],
                 body: tableBody,
                 theme: 'grid',
                 headStyles: { fillColor: [30, 30, 30], textColor: 255 },
                 styles: { fontSize: 10, cellPadding: 5 },
                 columnStyles: {
                     0: { cellWidth: 'auto' },
-                    1: { cellWidth: 40 },
-                    2: { cellWidth: 30, halign: 'right' },
-                    3: { cellWidth: 40 }
+                    1: { cellWidth: 'auto' },
+                    2: { cellWidth: 40, halign: 'right' }
                 }
             });
-
-            // Signatures
-            const finalY = (doc as any).lastAutoTable.finalY + 40;
-
-            doc.setLineWidth(0.5);
-            doc.line(margin, finalY, margin + 60, finalY);
-            doc.setFontSize(8);
-            doc.text("AUTHORIZED SIGNATURE", margin, finalY + 5);
-
-            doc.line(pageWidth - margin - 60, finalY, pageWidth - margin, finalY);
-            doc.text("RECEIVED BY", pageWidth - margin - 60, finalY + 5);
-
-            // Footer
-            doc.setFontSize(8);
-            doc.setTextColor(150);
-            doc.text(`Generated by IMS Laboratory System on ${new Date().toLocaleString()}`, margin, pageWidth - 10); // Rotate 90 deg manually if needed, but here simple footer
 
             doc.save(`PO_${order._id.slice(-8)}.pdf`);
         } catch (err: any) {

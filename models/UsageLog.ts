@@ -8,6 +8,8 @@ const UsageLogSchema = new mongoose.Schema({
     reason: { type: String, default: "" },
     status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
     approved_by: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    initial_quantity: { type: Number }, // Quantity before the operation
+    final_quantity: { type: Number }, // Quantity after the operation
 }, { timestamps: true });
 
 export default mongoose.models.UsageLog || mongoose.model('UsageLog', UsageLogSchema);

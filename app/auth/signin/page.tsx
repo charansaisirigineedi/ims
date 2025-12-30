@@ -156,21 +156,6 @@ export default function SignInPage() {
                         {!loading && <ArrowRight size={18} />}
                     </button>
                 </form>
-
-                <div style={{ marginTop: '2.5rem', padding: '1.5rem', background: 'var(--bg-subtle)', borderRadius: 'var(--radius-md)', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                        <span>Admin Access</span>
-                        <code style={{ color: 'var(--accent-primary)', background: '#fff', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--border-subtle)' }}>admin@lab.com</code>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                        <span>User Access</span>
-                        <code style={{ color: 'var(--accent-primary)', background: '#fff', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--border-subtle)' }}>user@lab.com</code>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--border-subtle)', paddingTop: '0.75rem', marginTop: '0.75rem' }}>
-                        <span>Default Key</span>
-                        <code style={{ color: 'var(--text-primary)', background: '#fff', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--border-subtle)' }}>password123</code>
-                    </div>
-                </div>
             </div>
         </div>
     );

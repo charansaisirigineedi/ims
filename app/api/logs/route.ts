@@ -99,11 +99,18 @@ export async function PATCH(request: Request) {
             const item = await Item.findById(log.item_id);
             if (!item) return NextResponse.json({ error: "Item not found" }, { status: 404 });
 
+            // Store initial quantity before operation
+            log.initial_quantity = item.quantity;
+
+            // Apply the operation
             if (log.type === 'subtract') {
                 item.quantity -= log.quantity;
             } else {
                 item.quantity += log.quantity;
             }
+
+            // Store final quantity after operation
+            log.final_quantity = item.quantity;
             await item.save();
         }
 

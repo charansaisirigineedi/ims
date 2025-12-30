@@ -215,11 +215,22 @@ export default function ItemDetailsPage() {
                                                 {log.type === 'add' ? <Plus size={16} /> : <Minus size={16} />}
                                             </div>
                                             <div>
-                                                <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>
+                                                <div style={{ fontWeight: 600, fontSize: '0.95rem', marginBottom: '0.25rem' }}>
                                                     {log.type === 'add' ? 'Restocked' : 'Subtraction'}
                                                     <span style={{ margin: '0 0.4rem', color: 'var(--text-tertiary)' }}>•</span>
                                                     {log.quantity} {item.unit}
                                                 </div>
+                                                {log.status === 'approved' && log.initial_quantity !== undefined && log.final_quantity !== undefined && (
+                                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.25rem', lineHeight: 1.4 }}>
+                                                        <span style={{ fontWeight: 600 }}>Initial:</span> {log.initial_quantity} {item.unit}
+                                                        <span style={{ margin: '0 0.5rem', color: 'var(--text-tertiary)' }}>→</span>
+                                                        <span style={{ fontWeight: 600, color: log.type === 'add' ? 'var(--status-success)' : 'var(--status-error)' }}>
+                                                            {log.type === 'add' ? '+' : '-'}{log.quantity}
+                                                        </span>
+                                                        <span style={{ margin: '0 0.5rem', color: 'var(--text-tertiary)' }}>→</span>
+                                                        <span style={{ fontWeight: 600 }}>Final:</span> {log.final_quantity} {item.unit}
+                                                    </div>
+                                                )}
                                                 <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.2rem' }}>
                                                     <User size={12} />
                                                     {log.user_id?.name || 'Unknown User'}
